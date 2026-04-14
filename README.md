@@ -123,6 +123,7 @@ ATTACK PLAN:
 Architecture
 
 core/
+
  ├── engine.py
  
  ├── ai.py
@@ -131,6 +132,7 @@ core/
 
 
 modules/
+
  ├── dnsinfo.py
  
  ├── subdomain.py
