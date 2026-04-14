@@ -1,8 +1,10 @@
+#!/usr/bin/env python3        
+
 import requests
-import threading              from concurrent.futures import ThreadPoolExecutor
+import threading              
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from urllib3.exceptions import InsecureRequestWarning       
-# Desabilita avisos de SSL (importante para pentest)        requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
