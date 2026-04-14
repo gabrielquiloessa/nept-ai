@@ -1,0 +1,6 @@
+# Core dependencies
+requests>=2.31.0
+dnspython>=2.3.1
+colorama>=0.4.6
+
+# JSON, threading, etc. (builtin, included in Python 3)

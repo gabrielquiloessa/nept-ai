@@ -1,0 +1,497 @@
+[
+    {
+        "name": "FTP Exposed",
+        "match": {
+            "type": "port_equals",
+            "value": [21]
+        },
+        "actions": [
+            "Test anonymous login",
+            "Try weak credentials",
+            "Check file upload"
+        ],
+        "severity": 6,
+        "priority": 9
+    },
+    {
+        "name": "SSH Exposed",
+        "match": {
+            "type": "port_equals",
+            "value": [22]
+        },
+        "actions": [
+            "Test brute-force",
+            "Check key reuse"
+        ],
+        "severity": 4,
+        "priority": 6
+    },
+    {
+        "name": "Database Exposed",
+        "match": {
+            "type": "port_equals",
+            "value": [3306]
+        },
+        "actions": [
+            "Attempt DB connection",
+            "Check weak credentials",
+            "Dump database"
+        ],
+        "severity": 9,
+        "priority": 10
+    },
+    {
+        "name": "Mail Service",
+        "match": {
+            "type": "port_equals",
+            "value": [25, 110, 143]
+        },
+        "actions": [
+            "Test auth",
+            "Enumerate users"
+        ],
+        "severity": 5,
+        "priority": 7
+    },
+    {
+        "name": "Web Service",
+        "match": {
+            "type": "port_equals",
+            "value": [80, 443]
+        },
+        "actions": [
+            "Run dir fuzzing",
+            "Check XSS/SQLi"
+        ],
+        "severity": 3,
+        "priority": 5
+    },
+    {
+        "name": "Web Server",
+        "match": {
+            "type": "server_contains",
+            "value": ["apache", "nginx", "gws"]
+        },
+        "actions": [
+            "Check server version",
+            "Search CVEs"
+        ],
+        "severity": 2,
+        "priority": 4
+    },
+    {
+        "name": "Live Website",
+        "match": {
+            "type": "status_equals",
+            "value": [200]
+        },
+        "actions": [
+            "Run directory fuzzing",
+            "Test parameters",
+            "Check XSS/SQLi"
+        ],
+        "severity": 3,
+        "priority": 6
+    },
+    {
+        "name": "Login Panel",
+        "match": {
+            "type": "url_contains",
+            "value": ["admin", "login", "cpanel"]
+        },
+        "actions": [
+            "Test weak credentials",
+            "Check default creds"
+        ],
+        "severity": 7,
+        "priority": 8
+    },
+    {
+        "name": "DNS Infrastructure Detected",
+        "match": {
+            "type": "tech_contains",
+            "value": ["DNS"]
+        },
+        "actions": [
+            "Attempt zone transfer (AXFR)",
+            "Enumerate subdomains",
+            "Check recursion enabled",
+            "Brute-force DNS",
+            "Check DNS misconfigurations"
+        ],
+        "severity": 7,
+        "priority": 9
+    },
+    {
+        "name": "Sensitive File Exposure",
+        "severity": 9,
+        "priority": 10,
+        "match": {
+            "type": "url_contains",
+            "value": [".env", ".git", "backup", "db.sql", "config.php"]
+        },
+        "actions": [
+            "Download file",
+            "Extract secrets",
+            "Check for credentials",
+            "Search API keys",
+            "Try reuse credentials"
+        ]
+    },
+    {
+        "name": "Admin Panel Exposure",
+        "severity": 9,
+        "priority": 9,
+        "match": {
+            "type": "url_contains",
+            "value": ["admin", "login", "cpanel", "dashboard", "manager"]
+        },
+        "actions": [
+            "Try default creds",
+            "Brute force login",
+            "Check for auth bypass",
+            "Test SQLi on login"
+        ]
+    },
+    {
+        "name": "Critical Ports Open",
+        "severity": 9,
+        "priority": 10,
+        "match": {
+            "type": "port_equals",
+            "value": [21, 22, 23, 3306, 6379, 27017]
+        },
+        "actions": [
+            "Test weak credentials",
+            "Check anonymous access",
+            "Exploit service",
+            "Enumerate service"
+        ]
+    },
+    {
+        "name": "SSRF Potential",
+        "severity": 10,
+        "priority": 7,
+        "match": {
+            "type": "url_contains",
+            "value": ["redirect", "url=", "dest=", "next=", "callback="]
+        },
+        "actions": [
+            "Test SSRF",
+            "Inject internal IPs",
+            "Access metadata service",
+            "Bypass filters"
+        ]
+    },
+    {
+        "name": "PHP Detected",
+        "severity": 7,
+        "priority": 6,
+        "match": {
+            "type": "tech_contains",
+            "value": ["PHP"]
+        },
+        "actions": [
+            "Test LFI",
+            "RFI",
+            "Check file upload",
+            "Test command injection"
+        ]
+    },
+    {
+        "name": "WordPress Detected",
+        "severity": 8,
+        "priority": 7,
+        "match": {
+            "type": "tech_contains",
+            "value": ["WordPress"]
+        },
+        "actions": [
+            "Scan plugins",
+            "Check wp-admin",
+            "Brute force login",
+            "Exploit outdated plugins"
+        ]
+    },
+    {
+        "name": "Node.js Detected",
+        "severity": 7,
+        "priority": 6,
+        "match": {
+            "type": "tech_contains",
+            "value": ["Node.js"]
+        },
+        "actions": [
+            "Test prototype pollution",
+            "Check API endpoints",
+            "Test JSON injection"
+        ]
+    },
+    {
+        "name": "Nginx Server",
+        "severity": 5,
+        "priority": 5,
+        "match": {
+            "type": "server_contains",
+            "value": ["nginx"]
+        },
+        "actions": [
+            "Check misconfigurations",
+            "Test path traversal",
+            "Check default files"
+        ]
+    },
+    {
+        "name": "Apache Server",
+        "severity": 5,
+        "priority": 5,
+        "match": {
+            "type": "server_contains",
+            "value": ["apache"]
+        },
+        "actions": [
+            "Check .htaccess issues",
+            "Test directory listing",
+            "Exploit misconfig"
+        ]
+    },
+    {
+        "name": "Sensitive Directories",
+        "severity": 10,
+        "priority": 9,
+        "match": {
+            "type": "url_contains",
+            "value": ["upload", "files", "private", "backup", "api"]
+        },
+        "actions": [
+            "Upload shell",
+            "Download files",
+            "Test IDOR",
+            "Enumerate API"
+        ]
+    },
+    {
+        "name": "API Endpoint Detected",
+        "severity": 9,
+        "priority": 8,
+        "match": {
+            "type": "url_contains",
+            "value": ["api", "v1", "v2", "graphql"]
+        },
+        "actions": [
+            "Test IDOR",
+            "Fuzz endpoints",
+            "Check auth bypass",
+            "Test rate limit"
+        ]
+    },
+    {
+        "name": "Open Redirect Risk",
+        "severity": 7,
+        "priority": 7,
+        "match": {
+            "type": "url_contains",
+            "value": ["redirect=", "url=", "next="]
+        },
+        "actions": [
+            "Test open redirect",
+            "Phishing chain",
+            "Bypass validation"
+        ]
+    },
+    {
+        "name": "Single IP Infrastructure",
+        "severity": 6,
+        "priority": 6,
+        "match": {
+            "type": "status_equals",
+            "value": ["None"]
+        },
+        "actions": [
+            "Run full port scan",
+            "Fingerprint services",
+            "Check exposed services"
+        ]
+    },
+    {
+        "name": "Missing SPF/DMARC",
+        "severity": 9,
+        "priority": 9,
+        "match": {
+            "type": "status_equals",
+            "value": ["None"]
+        },
+        "actions": [
+            "Test email spoofing",
+            "Send phishing simulation",
+            "Check mail security"
+        ]
+    },
+    {
+        "name": "DNS Takeover Risk",
+        "severity": 10,
+        "priority": 10,
+        "match": {
+            "type": "server_contains",
+            "value": ["parked", "expired", "github.io", "heroku", "amazonaws", "s3"]
+        },
+        "actions": [
+            "Check takeover",
+            "Verify DNS ownership",
+            "Try subdomain takeover",
+            "Run asset enumeration"
+        ]
+    },
+    {
+        "name": "External NS Provider",
+        "severity": 7,
+        "priority": 8,
+        "match": {
+            "type": "url_contains",
+            "value": ["angoweb", "cloudflare", "dns", "registrar", "nikka"]
+        },
+        "actions": [
+            "Check zone transfer",
+            "Enumerate subdomains",
+            "Check DNS misconfig"
+        ]
+    },
+    {
+        "name": "Weak SPF Policy",
+        "severity": 9,
+        "priority": 9,
+        "match": {
+            "type": "url_contains",
+            "value": ["-all", "~all", "+all"]
+        },
+        "actions": [
+            "Test email spoofing",
+            "Send controlled phishing test",
+            "Check DMARC policy"
+        ]
+    },
+    {
+        "name": "Mail Hosted on Root Domain",
+        "severity": 7,
+        "priority": 6,
+        "match": {
+            "type": "url_contains",
+            "value": ["mx", "mail"]
+        },
+        "actions": [
+            "Test SMTP relay",
+            "Check authentication bypass",
+            "Enumerate users"
+        ]
+    },
+    {
+        "name": "SOA Information Disclosure",
+        "severity": 5,
+        "priority": 6,
+        "match": {
+            "type": "url_contains",
+            "value": ["admin", "notif", "contact"]
+        },
+        "actions": [
+            "Email harvesting",
+            "Infrastructure mapping"
+        ]
+    },
+    {
+        "name": "Backup File Exposure",
+        "severity": 8,
+        "priority": 8,
+        "match": {
+            "type": "url_contains",
+            "value": [".bak", ".old", ".backup", ".zip", ".tar"]
+        },
+        "actions": [
+            "Download sensitive files",
+            "Credential extraction"
+        ]
+    },
+    {
+        "name": "Cloud Bucket Exposure",
+        "severity": 10,
+        "priority": 10,
+        "match": {
+            "type": "url_contains",
+            "value": ["s3", "storage", "blob", "googleapis"]
+        },
+        "actions": [
+            "Public bucket check",
+            "Data leak analysis"
+        ]
+    },
+    {
+        "name": "Weak Authentication System",
+        "severity": 9,
+        "priority": 9,
+        "match": {
+            "type": "url_contains",
+            "value": ["login", "signin", "auth"]
+        },
+        "actions": [
+            "Bruteforce test",
+            "Session fixation",
+            "Auth bypass"
+        ]
+    },
+    {
+        "name": "High Value Recon Chain",
+        "severity": 10,
+        "priority": 10,
+        "match": {
+            "type": "url_contains",
+            "value": ["admin", "api", "dev", "staging", "cpanel"]
+        },
+        "actions": [
+            "Chain recon",
+            "Port scan",
+            "Subdomain pivot",
+            "Exploit mapping"
+        ]
+    },
+    {
+        "name": "MX Misconfiguration",
+        "severity": 7,
+        "priority": 8,
+        "match": {
+            "type": "mx_contains",
+            "value": ["google", "outlook", "mail"]
+        },
+        "actions": [
+            "Check email provider exposure",
+            "Test SPF alignment",
+            "Check spoofing risk"
+        ]
+    },
+    {
+        "name": "External NS Exposure",
+        "severity": 8,
+        "priority": 9,
+        "match": {
+            "type": "ns_contains",
+            "value": ["angoweb", "cloudflare"]
+        },
+        "actions": [
+            "Check zone transfer",
+            "Verify DNS ownership",
+            "Look for misconfigurations"
+        ]
+    },
+    {
+        "name": "TXT Sensitive Data",
+        "severity": 9,
+        "priority": 9,
+        "match": {
+            "type": "txt_contains",
+            "value": ["v=spf", "api", "key", "token"]
+        },
+        "actions": [
+            "Extract secrets",
+            "Check SPF policy",
+            "Search leaked credentials"
+        ]
+    }
+]
