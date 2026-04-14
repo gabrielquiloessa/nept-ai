@@ -1,8 +1,10 @@
-#!/usr/bin/env bash           
+#!/usr/bin/env bash
+
 # ===============================
 # Nept Recon Framework Installer
 # ===============================
-                              set -e
+
+set -e
 
 echo ""
 echo "====================================="
@@ -32,7 +34,7 @@ echo "[+] Instalando dependências base..."
 
 if [ "$PLATFORM" = "termux" ]; then
     pkg update -y
-    # No Termux, python-pip e venv já vêm no pacote python,
+    # No Termux, python-pip e venv já vêm no pacote python, 
     # mas garantimos a instalação do python-pip por segurança.
     pkg install -y python python-pip git
 else
@@ -57,8 +59,6 @@ if [ -f "requirements.txt" ]; then
 else
     echo "[!] requirements.txt não encontrado!"
 fi
-
-source venv/bin/activate
 
 # -------------------------
 # Permissões
@@ -93,6 +93,6 @@ echo "[+] O Nept está isolado no diretório ./venv"
 echo ""
 echo "Comandos disponíveis:"
 echo "  nept --console"
-echo "  nept recon -t example.com"
+echo "  nept recon -t alvo.com"
 echo ""
 echo "====================================="
