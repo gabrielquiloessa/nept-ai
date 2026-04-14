@@ -1,10 +1,11 @@
-#!/usr/bin/env python3        
-
 import requests
-import threading              
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from urllib3.exceptions import InsecureRequestWarning       
+from urllib3.exceptions import InsecureRequestWarning
+
+# Desabilita avisos de SSL (importante para pentest)
+requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,7 +26,7 @@ class Dir:
         self.threads = int(threads)
         self.results = []
         self.lock = threading.Lock()
-
+        
         # Otimização: Uso de Session para Keep-Alive
         self.session = requests.Session()
         adapter = requests.adapters.HTTPAdapter(pool_connections=self.threads, pool_maxsize=self.threads)
@@ -45,7 +46,7 @@ class Dir:
             with open(self.list, "r") as f:
                 raw_list += [line.strip() for line in f if line.strip()]
         raw_list += self.targets_raw
-
+        
         clean_targets = []
         for t in set(raw_list):
             # Detecta o melhor protocolo uma vez só para ganhar tempo
@@ -68,7 +69,7 @@ class Dir:
         try:
             # Usando a sessão persistente
             r = self.session.get(url, timeout=3, allow_redirects=False, verify=False)
-
+            
             # Filtro básico de falsos positivos (comum em servidores que dão 200 para tudo)
             if r.status_code in [200, 204, 301, 302, 307, 401, 403, 405]:
                 with self.lock:
@@ -89,7 +90,7 @@ class Dir:
 
         for target in targets:
             print(f"\n[i] Escaneando: {target}")
-
+            
             # ThreadPoolExecutor é mais rápido que criar threads manualmente aqui
             try:
                 with ThreadPoolExecutor(max_workers=self.threads) as executor:
