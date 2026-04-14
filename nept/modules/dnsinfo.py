@@ -1,8 +1,13 @@
-#!/usr/bin/env python3        
-import dns.resolver           import threading
-from queue import Queue, Emptyfrom pathlib import Path
+#!/usr/bin/env python3
+
+import dns.resolver
+import threading
+from queue import Queue, Empty
+from pathlib import Path
 from urllib.parse import urlparse
-import json                   import colorama               from colorama import Fore
+import json
+import colorama
+from colorama import Fore
 
 colorama.init()
 
@@ -99,7 +104,7 @@ class Dnsinfo:
             # Se não encontrar /etc/resolv.conf, usa DNS público manualmente
             resolver = dns.resolver.Resolver(configure=False)
             resolver.nameservers = ['8.8.8.8', '8.8.4.4', '1.1.1.1']
-
+        
         resolver.timeout = 4
         resolver.lifetime = 5
 
@@ -118,7 +123,7 @@ class Dnsinfo:
                 "target": target,
                 "host": target,
                 "status": "unknown",
-                "port": None,
+                "port": None, 
                 "url": f"http://{target}",
                 "server": None,
                 "A": [],
