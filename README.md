@@ -40,7 +40,7 @@ nept subdomain -t example.com
 
 # Linux (Recommended)
 
-git clone https://github.com/yourusername/nept.git
+git clone https://github.com/gabrielquiloessa/nept.git
 cd nept
 
 chmod +x install.sh
@@ -81,6 +81,7 @@ set <key> <value>
 run
 
 ai list
+
 ai add
 
 
@@ -123,15 +124,23 @@ Architecture
 
 core/
  ├── engine.py
+ 
  ├── ai.py
- |-- rules.json
+ 
+ ├── rules.json
+
 
 modules/
  ├── dnsinfo.py
+ 
  ├── subdomain.py
+ 
  ├── portscan.py
+ 
  ├── httpinfo.py
+ 
  ├── dir.py
+ 
  ├── recon.py
  
  
