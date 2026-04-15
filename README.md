@@ -76,9 +76,8 @@ ai add
 
 AI Commands
 
-nept recon -t example.com --ai list
-
-nept recon -t example.com --ai add
+nept recon --ai list
+nept recon --ai add
 
 Name: Sensitive File Exposure
 Severity (1-10): 9
