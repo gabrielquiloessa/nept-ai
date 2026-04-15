@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from urllib3.exceptions import InsecureRequestWarning
 
-# Desabilita avisos de SSL (importante para pentest)
+# Desabilita avisos de SSL
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +27,7 @@ class Dir:
         self.results = []
         self.lock = threading.Lock()
         
-        # Otimização: Uso de Session para Keep-Alive
+        # Uso de Session para Keep-Alive
         self.session = requests.Session()
         adapter = requests.adapters.HTTPAdapter(pool_connections=self.threads, pool_maxsize=self.threads)
         self.session.mount('http://', adapter)
@@ -37,7 +37,6 @@ class Dir:
             self.wordlist = Path(wordlist)
         else:
             self.wordlist = BASE_DIR / "wordlists" / "dom.txt"
-            # Removido print excessivo para não poluir o Termux
 
     def _prepare_targets(self):
         raw_list = []
@@ -67,10 +66,9 @@ class Dir:
     def _scan(self, base_url, path):
         url = f"{base_url}/{path}"
         try:
-            # Usando a sessão persistente
+            
             r = self.session.get(url, timeout=3, allow_redirects=False, verify=False)
             
-            # Filtro básico de falsos positivos (comum em servidores que dão 200 para tudo)
             if r.status_code in [200, 204, 301, 302, 307, 401, 403, 405]:
                 with self.lock:
                     print(f" [{r.status_code}] {url}")
@@ -89,15 +87,14 @@ class Dir:
         print(f"[+] Nept Dir-Fuzzer | Threads: {self.threads} | Palavras: {len(words)}")
 
         for target in targets:
-            print(f"\n[i] Escaneando: {target}")
+            print(f"\n[i] Scanning: {target}")
             
-            # ThreadPoolExecutor é mais rápido que criar threads manualmente aqui
             try:
                 with ThreadPoolExecutor(max_workers=self.threads) as executor:
                     # Envia todas as tarefas para o pool
                     executor.map(lambda w: self._scan(target, w), words)
             except KeyboardInterrupt:
-                print("\n[!] Abortando scan atual...")
+                print("\n[!] Aborting...")
                 break
 
-        print(f"\n[+] Scan de diretórios finalizado. {len(self.results)} encontrados.")
+        print(f"\n[+] Directory Scan done. {len(self.results)} encontrados.")
