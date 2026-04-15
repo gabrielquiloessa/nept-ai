@@ -23,7 +23,7 @@ Clone the repository and run the installer:
 pkg update && pkg upgrade -y
 pkg install git python -y
 
-git clone https://github.com/gabrielquiloessa/nept.git
+git clone https://github.com/gabrielquiloessa/nept-ai.git
 cd nept
 
 chmod +x install.sh
