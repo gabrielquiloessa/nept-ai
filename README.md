@@ -33,23 +33,13 @@ chmod +x install.sh
 nept --console
 
 # Run (cli mode)
+nept portscan -t example.com
 nept subdomain -t example.com
+nept dir -t example.com
+nept dnsinfo -t example.com
+nept httpinfo -t example.com
+nept recon -t example.com
 
-
-
-# Linux (Recommended)
-
-git clone https://github.com/gabrielquiloessa/nept.git
-cd nept
-
-chmod +x install.sh
-./install.sh
-
-# Run (console mode / interative mode)
-python3 main.py --console
-
-# Run (cli mode)
-python3 main.py dnsinfo -t example.com
 ```
 
 
