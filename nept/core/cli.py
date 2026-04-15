@@ -48,6 +48,17 @@ class CLI:
 
         if not args.module:
             print("[!] Use module or --console")
+            prinet("")
+            print("""
+Modules
+
+dir             Directory brute force
+dnsinfo         Dns Information
+subdomain       Subdomain brute force
+protscan        Ports scaner
+httpinfo        HTTP information
+recon           Test all modules            
+            """)
             return
 
         self.engine.use_module(args.module)
