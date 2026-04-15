@@ -48,7 +48,7 @@ class CLI:
 
         if not args.module:
             print("[!] Use module or --console")
-            prinet("")
+            print("")
             print("""
 Modules
 
