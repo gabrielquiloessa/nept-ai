@@ -29,12 +29,8 @@ cd nept
 chmod +x install.sh
 ./install.sh
 
-# Active the venv
-source venv/bin/activate
-
 # Run (console mode / Interative mode)
 nept --console
-
 
 # Run (cli mode)
 nept subdomain -t example.com
@@ -48,9 +44,6 @@ cd nept
 
 chmod +x install.sh
 ./install.sh
-
-# Active the venv
-source venv/bin/activate
 
 # Run (console mode / interative mode)
 python3 main.py --console
