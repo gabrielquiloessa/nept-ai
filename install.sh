@@ -1,20 +1,17 @@
 #!/usr/bin/env bash
 
-# ===============================
-# Nept Recon Framework Installer
-# ===============================
+# =====================================
+# Nept Recon Framework - Installer Pro
+# =====================================
 
 set -e
 
 echo ""
 echo "====================================="
-echo "   Nept Recon Framework Installer"
+echo "    Nept Recon Framework Installer"
 echo "====================================="
 echo ""
 
-# -------------------------
-# Detectar Plataforma
-# -------------------------
 if [ -d "/data/data/com.termux" ]; then
     PLATFORM="termux"
     BIN_DIR="$PREFIX/bin"
@@ -27,76 +24,59 @@ fi
 
 echo "[+] Plataforma detectada: $PLATFORM"
 
-# -------------------------
-# Instalar Dependências do Sistema
-# -------------------------
 echo "[+] Instalando dependências base..."
-
 if [ "$PLATFORM" = "termux" ]; then
     pkg update -y
-    # No Termux, python-pip e venv já vêm no pacote python, 
-    # mas garantimos a instalação do python-pip por segurança.
     pkg install -y python python-pip git
 else
     $SUDO apt update -y
-    $SUDO apt install -y python3 python3-pip python3-venv git
+    $SUDO apt install -y python3 python3-pip python3-venv git -y
 fi
 
-# -------------------------
-# Criar Ambiente Virtual (venv)
-# -------------------------
 echo "[+] Criando ambiente virtual Python (venv)..."
-python3 -m venv venv
+if [ -d "venv" ]; then
+    echo "[!] venv já existe, pulando criação..."
+else
+    python3 -m venv venv
+fi
 
-# -------------------------
-# Instalar Requisitos no venv
-# -------------------------
-echo "[+] Instalando dependências no ambiente isolado..."
-# Usamos o pip de dentro do venv para evitar o erro de ambiente externo
+echo "[+] Atualizando pip e instalando dependências..."
 ./venv/bin/pip install --upgrade pip
 if [ -f "requirements.txt" ]; then
     ./venv/bin/pip install -r requirements.txt
 else
-    echo "[!] requirements.txt não encontrado!"
+    echo "[!] AVISO: requirements.txt não encontrado!"
 fi
 
-# -------------------------
-# Permissões
-# -------------------------
 chmod +x main.py
 
-# -------------------------
-# Criar Atalho 'nept'
-# -------------------------
-echo "[+] Configurando o comando 'nept'..."
+echo "[+] Configurando o comando global 'nept'..."
 
-# O atalho agora aponta para o Python do venv
-CAT_CMD="cat <<EOF > $BIN_DIR/nept
+INSTALL_PATH=$(pwd)
+
+cat <<EOF > nept_wrapper
 #!/usr/bin/env bash
-$(pwd)/venv/bin/python3 $(pwd)/main.py \"\$@\"
-EOF"
+$INSTALL_PATH/venv/bin/python3 $INSTALL_PATH/main.py "\$@"
+EOF
 
 if [ "$PLATFORM" = "termux" ]; then
-    eval "$CAT_CMD"
+    mv nept_wrapper $BIN_DIR/nept
+    chmod +x $BIN_DIR/nept
 else
-    $SUDO bash -c "$CAT_CMD"
+    $SUDO mv nept_wrapper $BIN_DIR/nept
+    $SUDO chown root:root $BIN_DIR/nept
+    $SUDO chmod +x $BIN_DIR/nept
 fi
 
-chmod +x $BIN_DIR/nept
+if [ -f "./nept" ]; then
+    rm ./nept
+fi
 
-# -------------------------
-# Finalização
-# -------------------------
-echo ""
-echo "[+] Instalação concluída com sucesso!"
-echo "[+] O Nept está isolado no diretório ./venv"
-echo ""
-echo "Disponible Commands:"
-echo "  nept --console"
-echo "  nept recon -t example.com"
-echo ""
-echo "Or try:"
-echo "  python3 main.py --console"
-echo "  python3 main.py recon -t example.com"
 echo ""
 echo "====================================="
+echo "       INSTALAÇÃO CONCLUÍDA!"
+echo "====================================="
+echo ""
+echo "  nept --console"
+echo "  nept httpinfo -t example.com"
+echo ""
