@@ -55,7 +55,7 @@ Modules
 dir             Directory brute force
 dnsinfo         Dns Information
 subdomain       Subdomain brute force
-protscan        Ports scaner
+portscan        Ports scaner
 httpinfo        HTTP information
 recon           Test all modules            
             """)
