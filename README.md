@@ -76,8 +76,8 @@ ai add
 
 AI Commands
 
+```
 nept recon --ai list
-
 nept recon --ai add
 
 Name: Sensitive File Exposure
@@ -86,10 +86,12 @@ Priority (1-10): 10
 Match type: url_contains
 Match value (comma separated): .env,.git,backup,db.sql,config.php
 Actions (comma separated): Download file,Extract secrets,Check for credentials,Search API keys,Try reuse credentials
+```
 
 Note: The rule already exists.
 If was add return message:
 
+```
 [Nept Assistent] Rule added successfully!
 
 
@@ -107,33 +109,25 @@ ATTACK PLAN:
 1. Try default credentials
 2. Fuzz directories
 3. Check misconfigurations
-
+```
 
 Architecture
 
+```
 core/
-
- ├── engine.py
- 
- ├── ai.py
- 
+ ├── engine.py 
+ ├── ai.py 
  ├── rules.json
 
 
 modules/
-
- ├── dnsinfo.py
- 
+ ├── dnsinfo.py 
  ├── subdomain.py
- 
  ├── portscan.py
- 
  ├── httpinfo.py
- 
- ├── dir.py
- 
+ ├── dir.py 
  ├── recon.py
- 
+``` 
  
 Disclaimer
 
