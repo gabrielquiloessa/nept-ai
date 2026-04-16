@@ -45,22 +45,25 @@ nept recon -t example.com
 
 Modules
 
+```
 dir            Directory brute force
 dnsinfo        Dns Information
 subdomain      Subdomain brute force
 protscan       Ports scaner
 httpinfo       HTTP information
 recon          Test all modules
-
+```
 
 CLI Usage
 
+```
 nept recon -t example.com --ai
 nept dir -t example.com -w path/to/wordlist.txt
-
+```
 
 Interactive Console
 
+```
 nept --console
 
 # Commands
@@ -70,9 +73,8 @@ set <key> <value>
 run
 
 ai list
-
 ai add
-
+```
 
 AI Commands
 
