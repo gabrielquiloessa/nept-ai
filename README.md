@@ -24,7 +24,7 @@ pkg update && pkg upgrade -y
 pkg install git python -y
 
 git clone https://github.com/gabrielquiloessa/nept-ai.git
-cd nept
+cd nept-ai
 
 chmod +x install.sh
 ./install.sh
