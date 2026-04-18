@@ -18,7 +18,7 @@ class Subdomain:
             self.targets = []
 
             # -------------------------
-            # EXTRA PARAMS
+            # CONFIG
             # -------------------------
             self.output = kwargs.get("output") or kwargs.get("o")
             self.json_output = kwargs.get("json", False)
@@ -36,10 +36,12 @@ class Subdomain:
                 self.wordlist = Path(wordlist)
             else:
                 self.wordlist = default_wordlist
-                print(f"[i] Using default wordlist: {self.wordlist}")
+                if not self.json_output:
+                    print(f"[i] Using default wordlist: {self.wordlist}")
 
             if not self.wordlist.exists():
-                print(f"[!] Wordlist not found: {self.wordlist}")
+                if not self.json_output:
+                    print(f"[!] Wordlist not found: {self.wordlist}")
                 self.wordlist = None
 
             # -------------------------
@@ -49,7 +51,8 @@ class Subdomain:
                 try:
                     self.status = int(status)
                 except:
-                    print("[!] Invalid status")
+                    if not self.json_output:
+                        print("[!] Invalid status")
                     self.status = None
             else:
                 self.status = None
@@ -60,7 +63,8 @@ class Subdomain:
             self.targets = self._load_targets()
 
         except Exception as e:
-            print(f"[!] Error in __init__: {e}")
+            if not self.json_output:
+                print(f"[!] Error in __init__: {e}")
             self.wordlist = None
             self.status = None
 
@@ -79,6 +83,11 @@ class Subdomain:
         }
 
     # -------------------------
+    def _log(self, msg):
+        if not self.json_output:
+            print(msg)
+
+    # -------------------------
     def _load_targets(self):
         targets = set()
 
@@ -87,7 +96,7 @@ class Subdomain:
                 path = Path(self.list)
 
                 if not path.exists():
-                    print("[!] List file not found")
+                    self._log("[!] List file not found")
                     return []
 
                 with path.open() as f:
@@ -97,14 +106,14 @@ class Subdomain:
                             targets.add(line)
 
             except Exception as e:
-                print(f"[!] Error reading list: {e}")
+                self._log(f"[!] Error reading list: {e}")
                 return []
 
         elif self.target:
             targets.add(self.target)
 
         else:
-            print("[!] Target or list required")
+            self._log("[!] Target or list required")
             return []
 
         return list(targets)
@@ -170,24 +179,25 @@ class Subdomain:
                     for r in self.results:
                         f.write(f"{r['host']} -> {r['status']}\n")
 
-            print(f"\n[+] Saved output: {path}")
+            if not self.json_output:
+                print(f"\n[+] Saved output: {path}")
 
         except Exception as e:
-            print(f"[!] Error saving output: {e}")
+            self._log(f"[!] Error saving output: {e}")
 
     # -------------------------
     def run(self):
         try:
             if not self.targets:
-                print("[!] No valid targets")
+                self._log("[!] No valid targets")
                 return
 
             if not self.wordlist:
-                print("[!] No valid wordlist")
+                self._log("[!] No valid wordlist")
                 return
 
-            print(f"[+] Targets: {len(self.targets)}")
-            print(f"[+] Threads: {self.threads}")
+            self._log(f"[+] Targets: {len(self.targets)}")
+            self._log(f"[+] Threads: {self.threads}")
 
             subs = []
             with open(self.wordlist, 'rt', encoding="utf-8", errors="ignore") as f:
@@ -196,14 +206,14 @@ class Subdomain:
                     if sub and " " not in sub:
                         subs.append(sub)
 
-            print(f"[+] Subdomains loaded: {len(subs)}\n")
+            self._log(f"[+] Subdomains loaded: {len(subs)}\n")
 
             all_results = []
 
             for target in self.targets:
-                print("\n" + "=" * 50)
-                print(f"[i] Testing: {target}")
-                print("=" * 50)
+                self._log("\n" + "=" * 50)
+                self._log(f"[i] Testing: {target}")
+                self._log("=" * 50)
 
                 self.results = []
                 self.queue = Queue()
@@ -218,21 +228,21 @@ class Subdomain:
                     t = threading.Thread(target=self._worker, daemon=True)
                     t.start()
                     threads.append(t)
-                
+
                 try:
                     self.queue.join()
                 except KeyboardInterrupt:
-                    print("\n[!] Interrupted bu user")
+                    self._log("\n[!] Interrupted by user")
 
-                print(f"[+] Found on {target}: {len(self.results)}")
+                self._log(f"[+] Found on {target}: {len(self.results)}")
                 all_results.extend(self.results)
 
             self.results = all_results
 
-            print(f"\n[+] Enumeration finished")
-            print(f"[+] Total Found: {len(self.results)}")
+            self._log(f"\n[+] Enumeration finished")
+            self._log(f"[+] Total Found: {len(self.results)}")
 
             self._save_output()
 
         except Exception as e:
-            print(f"[!] Error in run(): {e}")
+            self._log(f"[!] Error in run(): {e}")
