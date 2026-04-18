@@ -235,7 +235,7 @@ class NeptAI:
                 print(f"   -> {display} (risk={i['risk']})")
             print()
 
-        print(f"\n[Nept Assistent] ATTACK PLAN:\n")
+        print(f"\n{Fore.GREEN}[Nept Assistent] ATTACK PLAN:\n")
 
         plan = self.build_attack_plan(findings)
 
