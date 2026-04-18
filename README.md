@@ -132,28 +132,30 @@ modules/
 ``` 
  
 Disclaimer
-
+```
 This tool is for educational and authorized security testing only.
 You are responsible for your actions.
-
+```
 Author
-
+```
 Gabriel Canga Quiloessa
 
 Cybersecurity | Pentester | Red Team
 Focused on offensive security and automation
-
+```
 Support
-
+```
 If you like this project:
 
  Star the repository
  Fork it
  Contribute ideas
-
+```
 Roadmap
- Plugin system
- AI auto-learning
- Web dashboard
- Distributed scanning
- Bug bounty mode
+```
+   Plugin system
+   AI auto-learning
+   Web dashboard
+   Distributed scanning
+   Bug bounty mode
+```
