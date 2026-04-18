@@ -42,6 +42,25 @@ class Recon:
 
         return list(set(targets))
 
+    def _score_target(self, target):
+        score = 0
+
+        high = ["admin", "login", "panel", "api", "dev", "test", "staging"]
+        medium = ["mail", "app", "dashboard"]
+
+        for w in high:
+            if w in target:
+                score += 50
+
+        for w in medium:
+            if w in target:
+                score += 20
+
+        if target.startswith("www"):
+            score += 10
+
+        return score
+
     def run(self):
         json_output = self.kwargs.get("json", False)
         output = self.kwargs.get("output")
@@ -72,52 +91,72 @@ class Recon:
             target=None,
             json=json_output,
             output=output,
-            threads=self.kwargs.get("threads", 50),
-            timeout=self.kwargs.get("timeout", 5)
+            threads=10 if self.mobile else self.kwargs.get("threads", 50),
+            timeout=5
         )
         sub.targets = dns_targets
         sub.run()
 
         all_targets = list(set([r["target"] for r in sub.results] + dns_targets))
 
+        scored = sorted(all_targets, key=lambda x: self._score_target(x), reverse=True)
+
+        if self.mobile:
+            selected_targets = scored[:3]
+        else:
+            selected_targets = scored[:8]
+
+        if not json_output:
+            print(f"[+] Total targets: {len(all_targets)} | Using: {len(selected_targets)}")
+
+        # ===== FAST MODE =====
+        if self.fast:
+            self.results = dns.results + sub.results
+            if not json_output:
+                print("\n[+] Recon completed (fast mode)")
+            return
+
         # ===== PORTSCAN =====
         port = Portscan(
             target=None,
             json=json_output,
             output=output,
-            threads=self.kwargs.get("threads", 100),
-            timeout=self.kwargs.get("timeout", 1)
+            threads=20 if self.mobile else self.kwargs.get("threads", 100),
+            timeout=2 if self.mobile else 1
         )
-        port.targets = all_targets
+        port.targets = selected_targets
         port.run()
 
-        if not self.fast:
-            # ===== HTTP =====
-            http = Httpinfo(
-                target=None,
-                json=json_output,
-                output=output
-            )
-            http.targets = all_targets
-            http.run()
+        # ===== HTTP =====
+        http = Httpinfo(
+            target=None,
+            json=json_output,
+            output=output
+        )
+        http.targets = selected_targets
+        http.run()
 
-            alive = [r["target"] for r in http.results if r.get("status")]
+        alive = [r["target"] for r in http.results if r.get("status")]
 
-            if self.mobile:
-                alive = alive[:3]
+        if not alive:
+            if not json_output:
+                print("[!] No alive hosts for HTTP/Dir")
+            self.results = dns.results + sub.results + port.results + http.results
+            return
 
-            # ===== DIR =====
-            dirscan = Dir(
-                targets=alive,
-                json=json_output,
-                output=output
-            )
-            dirscan.run()
+        # MOBILE LIMIT
+        if self.mobile:
+            alive = alive[:2]
 
-            self.results = dns.results + sub.results + port.results + http.results + dirscan.results
+        # ===== DIR =====
+        dirscan = Dir(
+            targets=[alive[0]],
+            json=json_output,
+            output=output
+        )
+        dirscan.run()
 
-        else:
-            self.results = dns.results + sub.results + port.results
+        self.results = dns.results + sub.results + port.results + http.results + dirscan.results
 
         if json_output:
             import json
