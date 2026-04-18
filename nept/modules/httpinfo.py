@@ -183,7 +183,7 @@ class Httpinfo:
 
         if not self.json_output:
             print(f"[+] Targets: {len(self.targets)}")
-        print(f"[+] Threads: {MAX_THREADS}\n")
+            print(f"[+] Threads: {MAX_THREADS}\n")
 
         for t in self.targets:
             self.queue.put(t)
@@ -199,7 +199,8 @@ class Httpinfo:
         if self.output:
             with open(self.output, "w") as f:
                 json.dump(self.results, f, indent=4)
-            print(f"[+] Saved to {self.output}")
+            if not self.json_output:
+                print(f"[+] Saved to: {self.output}")
 
         elif self.json_output:
             print(json.dumps(self.results, indent=4))
