@@ -21,7 +21,7 @@ class Recon:
     def options():
         return {
             "TARGET": {"required": False, "value": None},
-            "LIST": {"required": False, "value": None},   
+            "LIST": {"required": False, "value": None},
             "FAST": {"required": False, "value": False},
             "MOBILE": {"required": False, "value": False},
             "JSON": {"required": False, "value": False},
@@ -136,27 +136,32 @@ class Recon:
         http.targets = selected_targets
         http.run()
 
-        alive = [r["target"] for r in http.results if r.get("status")]
+        alive = []
+        for r in http.results:
+            if r.get("url") or r.get("status") is not None:
+                alive.append(r["target"])
 
+        # fallback caso http falhe
         if not alive:
-            if not json_output:
-                print("[!] No alive hosts for HTTP/Dir")
-            self.results = dns.results + sub.results + port.results + http.results
-            return
+            alive = selected_targets
 
-        # MOBILE LIMIT
         if self.mobile:
             alive = alive[:2]
 
         # ===== DIR =====
-        dirscan = Dir(
-            targets=[alive[0]],
-            json=json_output,
-            output=output
-        )
-        dirscan.run()
+        dir_results = []
+        targets_to_scan = alive[:2] if self.mobile else alive[:5]
 
-        self.results = dns.results + sub.results + port.results + http.results + dirscan.results
+        for host in targets_to_scan:
+            dirscan = Dir(
+                target=host,
+                json=json_output,
+                output=output
+            )
+            dirscan.run()
+            dir_results.extend(dirscan.results)
+
+        self.results = dns.results + sub.results + port.results + http.results + dir_results
 
         if json_output:
             import json
