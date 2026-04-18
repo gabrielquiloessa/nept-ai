@@ -97,11 +97,10 @@ class Dnsinfo:
         return results
 
     def _worker(self):
-        # Correção para o ambiente Termux (Android)
         try:
             resolver = dns.resolver.Resolver()
         except dns.resolver.NoResolverConfiguration:
-            # Se não encontrar /etc/resolv.conf, usa DNS público manualmente
+
             resolver = dns.resolver.Resolver(configure=False)
             resolver.nameservers = ['8.8.8.8', '8.8.4.4', '1.1.1.1']
         
@@ -207,8 +206,9 @@ class Dnsinfo:
             print("[!] No valid targets")
             return
 
-        print(f"[+] Targets: {len(self.targets)}")
-        print(f"[+] Threads: {MAX_THREADS}\n")
+        if not self.json_output:
+            print(f"[+] Targets: {len(self.targets)}")
+            print(f"[+] Threads: {MAX_THREADS}\n")
 
         for t in self.targets:
             self.queue.put(t)
@@ -224,7 +224,8 @@ class Dnsinfo:
         if self.output:
             with open(self.output, "w") as f:
                 json.dump(self.results, f, indent=4)
-            print(f"[+] Saved to {self.output}")
+            if not self.json_output:
+                print(f"[+] Saved to: {self.output}")
         elif self.json_output:
             print(json.dumps(self.results, indent=4))
         else:
