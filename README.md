@@ -79,7 +79,10 @@ ai add
 AI Commands
 
 ```
+# List all rules
 nept recon --ai list
+
+# Add new rule
 nept recon --ai add
 
 Name: Sensitive File Exposure
@@ -88,15 +91,14 @@ Priority (1-10): 10
 Match type: url_contains
 Match value (comma separated): .env,.git,backup,db.sql,config.php
 Actions (comma separated): Download file,Extract secrets,Check for credentials,Search API keys,Try reuse credentials
+
+[Nept Assistent] Rule added successfully!
 ```
 
 Note: The rule already exists.
 If was add return message:
 
 ```
-[Nept Assistent] Rule added successfully!
-
-
 Example Output
 
 [Nept Assistent] INTELLIGENCE REPORT
