@@ -19,6 +19,8 @@ class CLI:
         parser.add_argument("-l", "--list")
         parser.add_argument("-w", "--wordlist")
 
+        parser.add_argument("--mobile", action="store_true")
+        
         parser.add_argument("--fast", action="store_true")
         parser.add_argument("--threads", type=int)
 
@@ -67,6 +69,10 @@ recon           Test all modules
         if args.format == "json":
             self.engine.set_option("json", True)
 
+        # MOBILE MODE
+        if args.mobile:
+            self.engine.set_option("mobile", True)
+        
         # FAST MODE
         if args.fast:
             self.engine.set_option("threads", 100)
