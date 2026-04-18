@@ -1,100 +1,87 @@
-import requests
-import threading
-from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path
-from urllib3.exceptions import InsecureRequestWarning
+#!/usr/bin/env python3
 
-# Desabilita avisos de SSL
-requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+import argparse
+from .engine import Engine
 
-BASE_DIR = Path(__file__).resolve().parent.parent
 
-class Dir:
-    @staticmethod
-    def options():
-        return {
-            "TARGET": {"required": False, "value": None},
-            "LIST": {"required": False, "value": None},
-            "WORDLIST": {"required": False, "value": None},
-            "THREADS": {"required": False, "value": 50},
-        }
+class CLI:
 
-    def __init__(self, target=None, list=None, wordlist=None, targets=None, threads=50, **kwargs):
-        self.target = target
-        self.list = list
-        self.targets_raw = targets or []
-        self.threads = int(threads)
-        self.results = []
-        self.lock = threading.Lock()
-        
-        # Uso de Session para Keep-Alive
-        self.session = requests.Session()
-        adapter = requests.adapters.HTTPAdapter(pool_connections=self.threads, pool_maxsize=self.threads)
-        self.session.mount('http://', adapter)
-        self.session.mount('https://', adapter)
-
-        if wordlist:
-            self.wordlist = Path(wordlist)
-        else:
-            self.wordlist = BASE_DIR / "wordlists" / "dom.txt"
-
-    def _prepare_targets(self):
-        raw_list = []
-        if self.target: raw_list.append(self.target)
-        if self.list and Path(self.list).exists():
-            with open(self.list, "r") as f:
-                raw_list += [line.strip() for line in f if line.strip()]
-        raw_list += self.targets_raw
-        
-        clean_targets = []
-        for t in set(raw_list):
-            # Detecta o melhor protocolo uma vez só para ganhar tempo
-            t_clean = t.replace("http://", "").replace("https://", "").strip("/")
-            try:
-                # Tenta HTTPS primeiro (mais comum em 2026)
-                test = requests.get(f"https://{t_clean}", timeout=3, verify=False)
-                clean_targets.append(f"https://{t_clean}")
-            except:
-                clean_targets.append(f"http://{t_clean}")
-        return clean_targets
-
-    def _load_wordlist(self):
-        if not self.wordlist.exists(): return []
-        with open(self.wordlist, "r", encoding="utf-8", errors="ignore") as f:
-            return [line.strip() for line in f if line.strip() and " " not in line]
-
-    def _scan(self, base_url, path):
-        url = f"{base_url}/{path}"
-        try:
-            
-            r = self.session.get(url, timeout=3, allow_redirects=False, verify=False)
-            
-            if r.status_code in [200, 204, 301, 302, 307, 401, 403, 405]:
-                with self.lock:
-                    print(f" [{r.status_code}] {url}")
-                    self.results.append({"url": url, "status": r.status_code})
-        except:
-            pass
+    def __init__(self):
+        self.engine = Engine()
 
     def run(self):
-        targets = self._prepare_targets()
-        words = self._load_wordlist()
+        self.engine.load_modules()
 
-        if not targets or not words:
-            print("[!] Alvo ou wordlist inválidos.")
+        parser = argparse.ArgumentParser(description="Nept Recon Framework")
+
+        parser.add_argument("module", nargs="?", help="Module")
+        parser.add_argument("-t", "--target")
+        parser.add_argument("-l", "--list")
+        parser.add_argument("-w", "--wordlist")
+
+        parser.add_argument("--mobile", action="store_true")
+        
+        parser.add_argument("--fast", action="store_true")
+        parser.add_argument("--threads", type=int)
+
+        parser.add_argument("-f", "--format",
+                            choices=["json", "txt", "csv"],
+                            default="txt")
+
+        parser.add_argument("-o", "--output")
+
+        parser.add_argument("--ai", choices=["add", "list"])
+
+        parser.add_argument("--console", action="store_true")
+
+        args = parser.parse_args()
+
+        if args.console:
+            self.engine.console()
             return
 
-        print(f"[+] Nept Dir-Fuzzer | Threads: {self.threads} | Palavras: {len(words)}")
+        # ===== AI MODE =====
+        if args.ai:
+            if args.ai == "list":
+                self.engine.ai.list_rules()
+            elif args.ai == "add":
+                self.engine.ai.add_rule()
+            return
 
-        for target in targets:
-            print(f"\n[i] Scanning: {target}")
-            
-            try:
-                with ThreadPoolExecutor(max_workers=self.threads) as executor:
-                    # Envia todas as tarefas para o pool
-                    executor.map(lambda w: self._scan(target, w), words)
-            except KeyboardInterrupt:
-                print("\n[!] Aborting...")
-                break
+        if not args.module:
+            print("[!] Use module or --console")
+            print("")
+            print("""
+Modules
 
-        print(f"\n[+] Directory Scan done. {len(self.results)} encontrados.")
+dir             Directory brute force
+dnsinfo         Dns Information
+subdomain       Subdomain brute force
+portscan        Ports scaner
+httpinfo        HTTP information
+recon           Test all modules            
+            """)
+            return
+
+        self.engine.use_module(args.module)
+
+        # FORMAT -> JSON FLAG GLOBAL
+        if args.format == "json":
+            self.engine.set_option("json", True)
+
+        # MOBILE MODE
+        if args.mobile:
+            self.engine.set_option("mobile", True)
+        
+        # FAST MODE
+        if args.fast:
+            self.engine.set_option("threads", 100)
+            self.engine.set_option("timeout", 2)
+            self.engine.set_option("mobile", True)
+            self.engine.set_option("fast", True)
+
+        for k, v in vars(args).items():
+            if v and k not in ["module", "console", "fast", "ai", "format"]:
+                self.engine.set_option(k, v)
+
+        self.engine.run_module()
