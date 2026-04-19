@@ -22,9 +22,9 @@ else
     SUDO="sudo"
 fi
 
-echo "[+] Plataforma detectada: $PLATFORM"
+echo "[+] Platform detected: $PLATFORM"
 
-echo "[+] Instalando dependências base..."
+echo "[+] Installing basic dependencies..."
 if [ "$PLATFORM" = "termux" ]; then
     pkg update -y
     pkg install -y python python-pip git
@@ -33,24 +33,24 @@ else
     $SUDO apt install -y python3 python3-pip python3-venv git -y
 fi
 
-echo "[+] Criando ambiente virtual Python (venv)..."
+echo "[+] Creating a Python virtual environment (venv)..."
 if [ -d "venv" ]; then
-    echo "[!] venv já existe, pulando criação..."
+    echo "[!] The virtual environment already exists, therefore creating a new one is unnecessary..."
 else
     python3 -m venv venv
 fi
 
-echo "[+] Atualizando pip e instalando dependências..."
+echo "[+] Updating pip and installing the dependency..."
 ./venv/bin/pip install --upgrade pip
 if [ -f "requirements.txt" ]; then
     ./venv/bin/pip install -r requirements.txt
 else
-    echo "[!] AVISO: requirements.txt não encontrado!"
+    echo "[!] WARNING: requirements.txt not found!"
 fi
 
 chmod +x main.py
 
-echo "[+] Configurando o comando global 'nept'..."
+echo "[+] Setting up the global 'nept' command..."
 
 INSTALL_PATH=$(pwd)
 
@@ -74,7 +74,7 @@ fi
 
 echo ""
 echo "====================================="
-echo "       INSTALAÇÃO CONCLUÍDA!"
+echo "       INSTALLATION COMPLETE!"
 echo "====================================="
 echo ""
 echo "  nept --console"
