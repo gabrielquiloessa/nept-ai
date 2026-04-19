@@ -14,18 +14,21 @@ colorama.init()
 MAX_THREADS = 50
 
 class Dnsinfo:
+
     def __init__(self, target=None, list=None, output=None, json=False, **kwargs):
         self.target = target.strip() if target else None
         self.list = list
         self.output = output
         self.json_output = json
 
+        self.threads = int(kwargs.get("threads", 50))
+
         self.queue = Queue()
         self.lock = threading.Lock()
 
         self.targets = self._load_targets()
         self.results = []
-
+        
     @staticmethod
     def options():
         return {
@@ -208,7 +211,7 @@ class Dnsinfo:
 
         if not self.json_output:
             print(f"[+] Targets: {len(self.targets)}")
-            print(f"[+] Threads: {MAX_THREADS}\n")
+            print(f"[+] Threads: {self.threads}\n")
 
         for t in self.targets:
             self.queue.put(t)
