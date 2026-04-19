@@ -44,8 +44,7 @@ class Portscan:
             elif port:
                 self.ports = self._parse_ports(port)
             else:
-                if not self.json_output:
-                    print("[*] No port specified, using common ports...")
+                print("[*] No port specified, using common ports...")
                 self.ports = COMMON_PORTS
 
         except Exception as e:
@@ -200,7 +199,7 @@ class Portscan:
     # -------------------------
     def _save_output(self):
         if not self.output:
-            return
+            return  #  sem auto-save
 
         try:
             path = Path(self.output)
@@ -214,8 +213,8 @@ class Portscan:
                         f.write(
                             f"{r['target']}:{r['port']} ({r['service']}) {r['banner']}\n"
                         )
-            if not self.json_output:
-                print(f"\n[+] Saved output: {path}")
+
+            print(f"\n[+] Saved output: {path}")
 
         except Exception as e:
             print(f"[!] Error saving output: {e}")
@@ -236,25 +235,23 @@ class Portscan:
             if not self.json_output:
                 print(f"[+] Targets loaded: {len(self.targets)}")
                 print(f"[+] Ports: {len(self.ports)}")
-                print(f"[+] Threads: {self.threads}\n")
+            print(f"[+] Threads: {self.threads}\n")
 
             for target in self.targets:
             
                 self.queue = Queue()
 
-                if not self.json_output:
-                    print("\n" + "=" * 50)
-                    print(f"[i] Testing: {target}")
-                    print("=" * 50)
+                print("\n" + "=" * 50)
+                print(f"[i] Testing: {target}")
+                print("=" * 50)
 
                 try:
                     ip = socket.gethostbyname(target)
                 except:
                     print(f"[!] Failed to resolve: {target}")
                     continue
-                
-                if not self.json_output:
-                    print(f"[+] {target} -> {ip}")
+
+                print(f"[+] {target} -> {ip}")
 
                 for port in self.ports:
                     self.queue.put((target, ip, port))
@@ -269,9 +266,8 @@ class Portscan:
 
                 self.queue.join()
 
-            if not self.json_output:
-                print(f"\n[+] Scan finished")
-                print(f"[+] Open ports: {len(self.results)}")
+            print(f"\n[+] Scan finished")
+            print(f"[+] Open ports: {len(self.results)}")
 
             self._save_output()
 
