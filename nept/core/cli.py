@@ -95,7 +95,7 @@ recon           Run all modules
         if args.threads is not None:
             self.engine.set_option("threads", args.threads)
 
-        # ===== OUTROS PARAMS =====
+        # ===== OTHERS PARAMS =====
         for k, v in vars(args).items():
             if v is not None and k not in [
                 "module", "console", "fast", "ai", "format", "threads"
