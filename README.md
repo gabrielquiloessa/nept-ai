@@ -80,10 +80,10 @@ AI Commands
 
 ```
 # List all rules
-nept recon --ai list
+nept --ai list
 
 # Add new rule
-nept recon --ai add
+nept --ai add
 
 Name: Sensitive File Exposure
 Severity (1-10): 9
