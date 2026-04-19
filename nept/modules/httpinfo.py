@@ -22,7 +22,8 @@ class Httpinfo:
         self.output = output
         self.json_output = json
 
-        self.targets = self._load_targets()
+        self.threads = int(kwargs.get("threads", 50))
+        self.timeout = int(kwargs.get("timeout", 4))
 
         self.queue = Queue()
         self.lock = threading.Lock()
