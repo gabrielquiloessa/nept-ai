@@ -109,12 +109,14 @@ class Recon:
         if not json_output:
             print(f"[+] Total targets: {len(all_targets)} | Using: {len(selected_targets)}")
 
+        '''
         # ===== FAST MODE =====
         if self.fast:
             self.results = dns.results + sub.results
             if not json_output:
                 print("\n[+] Recon completed (fast mode)")
             return
+        '''
 
         # ===== PORTSCAN =====
         port = Portscan(
@@ -126,7 +128,7 @@ class Recon:
         )
         port.targets = selected_targets
         port.run()
-
+            
         # ===== HTTP =====
         http = Httpinfo(
             target=None,
@@ -141,7 +143,6 @@ class Recon:
             if r.get("url") or r.get("status") is not None:
                 alive.append(r["target"])
 
-        # fallback caso http falhe
         if not alive:
             alive = selected_targets
 
@@ -161,6 +162,13 @@ class Recon:
             dirscan.run()
             dir_results.extend(dirscan.results)
 
+        # ===== FAST MODE =====
+        if self.fast:
+            self.results = dns.results + sub.results + port.results + http.results + dirscan.results
+            if not json_output:
+                print("\n[+] Recon completed (fast mode)")
+            return
+            
         self.results = dns.results + sub.results + port.results + http.results + dir_results
 
         if json_output:
