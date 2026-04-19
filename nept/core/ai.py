@@ -93,7 +93,6 @@ class NeptAI:
             if not isinstance(r, dict):
                 continue
 
-            # CORREÇÃO AQUI: O módulo dnsinfo usa "tech", o normalizador procurava "technologies"
             tech_data = r.get("tech") or r.get("technologies") or []
 
             entry = {
@@ -128,7 +127,6 @@ class NeptAI:
 
         try:
             if t == "port_equals":
-                # Garante que estamos comparando inteiros com inteiros
                 r_port = r.get("port")
                 if r_port is None:
                     return False
