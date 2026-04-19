@@ -5,6 +5,8 @@ import requests
 import threading
 from queue import Queue, Empty
 import json
+import socket
+import time
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 MAX_THREADS = 30
@@ -15,60 +17,35 @@ class Subdomain:
         try:
             self.target = target.strip() if target else None
             self.list = list
-            self.targets = []
 
-            # -------------------------
-            # CONFIG
-            # -------------------------
             self.output = kwargs.get("output") or kwargs.get("o")
             self.json_output = kwargs.get("json", False)
             self.threads = int(kwargs.get("threads", MAX_THREADS))
             self.timeout = int(kwargs.get("timeout", 5))
+            self.mobile = kwargs.get("mobile", False)
+
+            # MOBILE FIX REAL
+            if self.mobile:
+                self.threads = min(self.threads, 15)
+                self.timeout = max(self.timeout, 7)
+                self.delay = 0.05  # anti-freeze
+            else:
+                self.delay = 0
 
             self.results = []
+            self.seen = set()
 
-            # -------------------------
-            # WORDLIST
-            # -------------------------
             default_wordlist = BASE_DIR / "wordlists" / "sub.txt"
-
-            if wordlist:
-                self.wordlist = Path(wordlist)
-            else:
-                self.wordlist = default_wordlist
-                if not self.json_output:
-                    print(f"[i] Using default wordlist: {self.wordlist}")
-
-            if not self.wordlist.exists():
-                if not self.json_output:
-                    print(f"[!] Wordlist not found: {self.wordlist}")
-                self.wordlist = None
-
-            # -------------------------
-            # STATUS FILTER
-            # -------------------------
-            if status is not None:
-                try:
-                    self.status = int(status)
-                except:
-                    if not self.json_output:
-                        print("[!] Invalid status")
-                    self.status = None
-            else:
-                self.status = None
+            self.wordlist = Path(wordlist) if wordlist else default_wordlist
 
             self.queue = Queue()
             self.lock = threading.Lock()
 
             self.targets = self._load_targets()
 
-        except Exception as e:
-            if not self.json_output:
-                print(f"[!] Error in __init__: {e}")
+        except Exception:
             self.wordlist = None
-            self.status = None
 
-    # -------------------------
     @staticmethod
     def options():
         return {
@@ -82,45 +59,63 @@ class Subdomain:
             "JSON": {"required": False, "value": False},
         }
 
-    # -------------------------
     def _log(self, msg):
         if not self.json_output:
             print(msg)
 
-    # -------------------------
     def _load_targets(self):
         targets = set()
 
         if self.list:
-            try:
-                path = Path(self.list)
-
-                if not path.exists():
-                    self._log("[!] List file not found")
-                    return []
-
+            path = Path(self.list)
+            if path.exists():
                 with path.open() as f:
                     for line in f:
-                        line = line.strip()
-                        if line and not line.startswith("#"):
-                            targets.add(line)
-
-            except Exception as e:
-                self._log(f"[!] Error reading list: {e}")
-                return []
+                        if line.strip():
+                            targets.add(line.strip())
 
         elif self.target:
             targets.add(self.target)
 
-        else:
-            self._log("[!] Target or list required")
-            return []
-
         return list(targets)
 
     # -------------------------
+    # PASSIVE ENUM (CRT.SH)
+    # -------------------------
+    def _crt(self, domain):
+        subs = set()
+        try:
+            url = f"https://crt.sh/?q=%25.{domain}&output=json"
+            r = requests.get(url, timeout=10)
+
+            if r.status_code != 200:
+                return subs
+
+            data = r.json()
+
+            for entry in data:
+                for s in entry.get("name_value", "").split("\n"):
+                    s = s.strip().lower().replace("*.", "")
+                    if domain in s:
+                        subs.add(s)
+
+        except Exception:
+            pass
+
+        return subs
+
+    def _resolve(self, host):
+        try:
+            socket.gethostbyname(host)
+            return True
+        except:
+            return False
+
     def _worker(self):
         session = requests.Session()
+        session.headers.update({
+            "User-Agent": "Mozilla/5.0 (Linux; Android 10; Mobile) Chrome/120 Safari/537.36"
+        })
 
         while True:
             try:
@@ -128,121 +123,97 @@ class Subdomain:
             except Empty:
                 break
 
-            host = f"{sub}.{target}"
-            url = f"http://{host}"
-
-            if ".." in host or host.startswith("#"):
-                self.queue.task_done()
-                continue
-
             try:
-                r = session.get(url, timeout=self.timeout, allow_redirects=False)
+                host = f"{sub}.{target}" if not sub.endswith(target) else sub
 
-                if self.status is not None:
-                    valid = r.status_code == self.status
-                else:
-                    valid = r.status_code in [200, 301, 302, 403, 500]
+                if host in self.seen:
+                    self.queue.task_done()
+                    continue
 
-                if valid:
-                    result = {
-                        "type": "subdomain",
-                        "target": host,
-                        "host": host,
-                        "url": url,
-                        "port": 80,
-                        "status": r.status_code
-                    }
+                self.seen.add(host)
 
+                resolved = self._resolve(host)
+                found = False
+
+                for scheme in ["https", "http"]:
+                    try:
+                        r = session.get(
+                            f"{scheme}://{host}",
+                            timeout=self.timeout,
+                            allow_redirects=False
+                        )
+
+                        if r.status_code in [200, 301, 302, 403, 401]:
+                            result = {
+                                "type": "subdomain",
+                                "target": host,
+                                "url": f"{scheme}://{host}",
+                                "status": r.status_code
+                            }
+
+                            with self.lock:
+                                if not self.json_output:
+                                    print(f"[{r.status_code}] {host}")
+                                self.results.append(result)
+
+                            found = True
+                            break
+
+                    except:
+                        continue
+
+                if not found and resolved:
                     with self.lock:
                         if not self.json_output:
-                            print(f"[{r.status_code}] {host}")
-                        self.results.append(result)
+                            print(f"[DNS] {host}")
+                        self.results.append({
+                            "type": "subdomain",
+                            "target": host,
+                            "status": "resolved"
+                        })
 
-            except requests.exceptions.RequestException:
+                if self.delay:
+                    time.sleep(self.delay)
+
+            except:
                 pass
 
             self.queue.task_done()
 
-    # -------------------------
-    def _save_output(self):
-        if not self.output:
+    def run(self):
+        if not self.targets:
+            self._log("[!] No targets")
             return
 
-        try:
-            path = Path(self.output)
+        subs = set()
 
-            if self.json_output:
-                with open(path, "w", encoding="utf-8") as f:
-                    json.dump(self.results, f, indent=4)
-            else:
-                with open(path, "w", encoding="utf-8") as f:
-                    for r in self.results:
-                        f.write(f"{r['host']} -> {r['status']}\n")
+        # PASSIVE
+        for t in self.targets:
+            self._log(f"[i] crt.sh: {t}")
+            subs.update(self._crt(t))
 
-            if not self.json_output:
-                print(f"\n[+] Saved output: {path}")
-
-        except Exception as e:
-            self._log(f"[!] Error saving output: {e}")
-
-    # -------------------------
-    def run(self):
-        try:
-            if not self.targets:
-                self._log("[!] No valid targets")
-                return
-
-            if not self.wordlist:
-                self._log("[!] No valid wordlist")
-                return
-
-            self._log(f"[+] Targets: {len(self.targets)}")
-            self._log(f"[+] Threads: {self.threads}")
-
-            subs = []
-            with open(self.wordlist, 'rt', encoding="utf-8", errors="ignore") as f:
+        # WORDLIST
+        if self.wordlist and self.wordlist.exists():
+            with open(self.wordlist, encoding="utf-8", errors="ignore") as f:
                 for line in f:
-                    sub = line.strip()
-                    if sub and " " not in sub:
-                        subs.append(sub)
+                    s = line.strip()
+                    if s:
+                        subs.add(s)
 
-            self._log(f"[+] Subdomains loaded: {len(subs)}\n")
+        self._log(f"[+] Total candidates: {len(subs)}")
 
-            all_results = []
+        for target in self.targets:
+            self.queue = Queue()
 
-            for target in self.targets:
-                self._log("\n" + "=" * 50)
-                self._log(f"[i] Testing: {target}")
-                self._log("=" * 50)
+            for s in subs:
+                self.queue.put((target, s))
 
-                self.results = []
-                self.queue = Queue()
+            threads = []
+            for _ in range(min(self.threads, self.queue.qsize())):
+                t = threading.Thread(target=self._worker, daemon=True)
+                t.start()
+                threads.append(t)
 
-                for sub in subs:
-                    self.queue.put((target, sub))
+            self.queue.join()
 
-                threads = []
-                total_threads = min(self.threads, self.queue.qsize())
-
-                for _ in range(total_threads):
-                    t = threading.Thread(target=self._worker, daemon=True)
-                    t.start()
-                    threads.append(t)
-
-                try:
-                    self.queue.join()
-                except KeyboardInterrupt:
-                    self._log("\n[!] Interrupted by user")
-
-                self._log(f"[+] Found on {target}: {len(self.results)}")
-                all_results.extend(self.results)
-
-            self.results = all_results
-
-            self._log(f"\n[+] Enumeration finished")
-            self._log(f"[+] Total Found: {len(self.results)}")
-
-            self._save_output()
-
-        except Exception as e:
-            self._log(f"[!] Error in run(): {e}")
+        self._log(f"\n[+] Found: {len(self.results)}")
