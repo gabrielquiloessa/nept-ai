@@ -13,6 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 class Dir:
+
     @staticmethod
     def options():
         return {
@@ -24,12 +25,16 @@ class Dir:
             "JSON": {"required": False, "value": False},
         }
 
-    def __init__(self, target=None, list=None, wordlist=None, threads=50, output=None, json=False, **kwargs):
+    def __init__(self, target=None, list=None, wordlist=None,
+                 threads=50, output=None, json=False, **kwargs):
+
         self.target = target
         self.list = list
-        self.threads = int(threads)
+        self.threads = int(threads or 50)
+
         self.results = []
         self.lock = threading.Lock()
+
         self.output = output
         self.json_output = json
 
@@ -51,38 +56,54 @@ class Dir:
         raw_list = [self.target] if self.target else []
 
         if self.list and Path(self.list).exists():
-            with open(self.list, "r", encoding="utf-8", errors="ignore") as f:
-                raw_list += [line.strip() for line in f if line.strip()]
+            try:
+                with open(self.list, "r", encoding="utf-8", errors="ignore") as f:
+                    raw_list += [line.strip() for line in f if line.strip()]
+            except Exception as e:
+                self._log(f"[!] Error reading list: {e}")
 
-        clean_targets = []
+        clean = []
         for t in set(raw_list):
-            t_clean = t.replace("http://", "").replace("https://", "").strip("/")
-            clean_targets.append(f"https://{t_clean}")
+            t = t.replace("http://", "").replace("https://", "").strip("/")
+            clean.append(f"https://{t}")
 
-        return clean_targets
+        return clean
 
     def _load_wordlist(self):
         if not self.wordlist.exists():
             return []
 
-        with open(self.wordlist, "r", encoding="utf-8", errors="ignore") as f:
-            return [line.strip() for line in f if line.strip() and " " not in line]
+        try:
+            with open(self.wordlist, "r", encoding="utf-8", errors="ignore") as f:
+                return [w.strip() for w in f if w.strip() and " " not in w]
+        except Exception as e:
+            self._log(f"[!] Wordlist error: {e}")
+            return []
 
-    def _scan(self, base_url, path):
-        url = f"{base_url}/{path}"
+    def _scan(self, base, path):
+        url = f"{base}/{path}"
 
         try:
-            r = self.session.get(url, timeout=3, allow_redirects=False, verify=False)
+            r = self.session.get(
+                url,
+                timeout=3,
+                allow_redirects=False,
+                verify=False
+            )
 
-            if r.status_code in [200, 204, 301, 302, 307, 401, 403, 405]:
+            if r.status_code in [200,204,301,302,307,401,403,405]:
                 with self.lock:
                     self.results.append({"url": url, "status": r.status_code})
 
                     if not self.json_output:
                         print(f"[{r.status_code}] {url}")
 
-        except:
+        except requests.exceptions.Timeout:
             pass
+        except requests.exceptions.ConnectionError:
+            pass
+        except Exception as e:
+            self._log(f"[!] Error: {e}")
 
     def run(self):
         targets = self._prepare_targets()
@@ -93,12 +114,14 @@ class Dir:
 
         words = self._load_wordlist()
 
-        self._log(f"[+] Targets: {len(targets)}")
-        self._log(f"[+] Threads: {self.threads}")
-        self._log(f"[+] Words: {len(words)}")
+        if not self.json_output:
+            self._log(f"[+] Targets: {len(targets)}")
+            self._log(f"[+] Threads: {self.threads}")
+            self._log(f"[+] Words: {len(words)}")
 
-        with ThreadPoolExecutor(max_workers=self.threads) as executor:
-            for target in targets:
-                self._log(f"[i] Scanning: {target}")
-                for word in words:
-                    executor.submit(self._scan, target, word)
+        with ThreadPoolExecutor(max_workers=self.threads) as ex:
+            for t in targets:
+                if not self.json_output:
+                    self._log(f"[i] Scanning: {t}")
+                for w in words:
+                    ex.submit(self._scan, t, w)
