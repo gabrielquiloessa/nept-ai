@@ -57,7 +57,7 @@ recon          Test all modules
 CLI Usage
 
 ```
-nept recon -t example.com --ai
+nept recon -t example.com
 nept dir -t example.com -w path/to/wordlist.txt
 ```
 
