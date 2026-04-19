@@ -3,7 +3,9 @@
         "name": "FTP Exposed",
         "match": {
             "type": "port_equals",
-            "value": [21]
+            "value": [
+                21
+            ]
         },
         "actions": [
             "Test anonymous login",
@@ -17,7 +19,9 @@
         "name": "SSH Exposed",
         "match": {
             "type": "port_equals",
-            "value": [22]
+            "value": [
+                22
+            ]
         },
         "actions": [
             "Test brute-force",
@@ -30,7 +34,9 @@
         "name": "Database Exposed",
         "match": {
             "type": "port_equals",
-            "value": [3306]
+            "value": [
+                3306
+            ]
         },
         "actions": [
             "Attempt DB connection",
@@ -44,7 +50,11 @@
         "name": "Mail Service",
         "match": {
             "type": "port_equals",
-            "value": [25, 110, 143]
+            "value": [
+                25,
+                110,
+                143
+            ]
         },
         "actions": [
             "Test auth",
@@ -57,7 +67,10 @@
         "name": "Web Service",
         "match": {
             "type": "port_equals",
-            "value": [80, 443]
+            "value": [
+                80,
+                443
+            ]
         },
         "actions": [
             "Run dir fuzzing",
@@ -70,7 +83,11 @@
         "name": "Web Server",
         "match": {
             "type": "server_contains",
-            "value": ["apache", "nginx", "gws"]
+            "value": [
+                "apache",
+                "nginx",
+                "gws"
+            ]
         },
         "actions": [
             "Check server version",
@@ -83,7 +100,9 @@
         "name": "Live Website",
         "match": {
             "type": "status_equals",
-            "value": [200]
+            "value": [
+                200
+            ]
         },
         "actions": [
             "Run directory fuzzing",
@@ -97,7 +116,11 @@
         "name": "Login Panel",
         "match": {
             "type": "url_contains",
-            "value": ["admin", "login", "cpanel"]
+            "value": [
+                "admin",
+                "login",
+                "cpanel"
+            ]
         },
         "actions": [
             "Test weak credentials",
@@ -110,7 +133,9 @@
         "name": "DNS Infrastructure Detected",
         "match": {
             "type": "tech_contains",
-            "value": ["DNS"]
+            "value": [
+                "DNS"
+            ]
         },
         "actions": [
             "Attempt zone transfer (AXFR)",
@@ -128,7 +153,13 @@
         "priority": 10,
         "match": {
             "type": "url_contains",
-            "value": [".env", ".git", "backup", "db.sql", "config.php"]
+            "value": [
+                ".env",
+                ".git",
+                "backup",
+                "db.sql",
+                "config.php"
+            ]
         },
         "actions": [
             "Download file",
@@ -144,7 +175,13 @@
         "priority": 9,
         "match": {
             "type": "url_contains",
-            "value": ["admin", "login", "cpanel", "dashboard", "manager"]
+            "value": [
+                "admin",
+                "login",
+                "cpanel",
+                "dashboard",
+                "manager"
+            ]
         },
         "actions": [
             "Try default creds",
@@ -159,7 +196,14 @@
         "priority": 10,
         "match": {
             "type": "port_equals",
-            "value": [21, 22, 23, 3306, 6379, 27017]
+            "value": [
+                21,
+                22,
+                23,
+                3306,
+                6379,
+                27017
+            ]
         },
         "actions": [
             "Test weak credentials",
@@ -174,7 +218,13 @@
         "priority": 7,
         "match": {
             "type": "url_contains",
-            "value": ["redirect", "url=", "dest=", "next=", "callback="]
+            "value": [
+                "redirect",
+                "url=",
+                "dest=",
+                "next=",
+                "callback="
+            ]
         },
         "actions": [
             "Test SSRF",
@@ -189,7 +239,9 @@
         "priority": 6,
         "match": {
             "type": "tech_contains",
-            "value": ["PHP"]
+            "value": [
+                "PHP"
+            ]
         },
         "actions": [
             "Test LFI",
@@ -204,7 +256,9 @@
         "priority": 7,
         "match": {
             "type": "tech_contains",
-            "value": ["WordPress"]
+            "value": [
+                "WordPress"
+            ]
         },
         "actions": [
             "Scan plugins",
@@ -219,7 +273,9 @@
         "priority": 6,
         "match": {
             "type": "tech_contains",
-            "value": ["Node.js"]
+            "value": [
+                "Node.js"
+            ]
         },
         "actions": [
             "Test prototype pollution",
@@ -233,7 +289,9 @@
         "priority": 5,
         "match": {
             "type": "server_contains",
-            "value": ["nginx"]
+            "value": [
+                "nginx"
+            ]
         },
         "actions": [
             "Check misconfigurations",
@@ -247,7 +305,9 @@
         "priority": 5,
         "match": {
             "type": "server_contains",
-            "value": ["apache"]
+            "value": [
+                "apache"
+            ]
         },
         "actions": [
             "Check .htaccess issues",
@@ -261,7 +321,13 @@
         "priority": 9,
         "match": {
             "type": "url_contains",
-            "value": ["upload", "files", "private", "backup", "api"]
+            "value": [
+                "upload",
+                "files",
+                "private",
+                "backup",
+                "api"
+            ]
         },
         "actions": [
             "Upload shell",
@@ -276,7 +342,12 @@
         "priority": 8,
         "match": {
             "type": "url_contains",
-            "value": ["api", "v1", "v2", "graphql"]
+            "value": [
+                "api",
+                "v1",
+                "v2",
+                "graphql"
+            ]
         },
         "actions": [
             "Test IDOR",
@@ -291,7 +362,11 @@
         "priority": 7,
         "match": {
             "type": "url_contains",
-            "value": ["redirect=", "url=", "next="]
+            "value": [
+                "redirect=",
+                "url=",
+                "next="
+            ]
         },
         "actions": [
             "Test open redirect",
@@ -305,7 +380,9 @@
         "priority": 6,
         "match": {
             "type": "status_equals",
-            "value": ["None"]
+            "value": [
+                "None"
+            ]
         },
         "actions": [
             "Run full port scan",
@@ -319,7 +396,9 @@
         "priority": 9,
         "match": {
             "type": "status_equals",
-            "value": ["None"]
+            "value": [
+                "None"
+            ]
         },
         "actions": [
             "Test email spoofing",
@@ -333,7 +412,14 @@
         "priority": 10,
         "match": {
             "type": "server_contains",
-            "value": ["parked", "expired", "github.io", "heroku", "amazonaws", "s3"]
+            "value": [
+                "parked",
+                "expired",
+                "github.io",
+                "heroku",
+                "amazonaws",
+                "s3"
+            ]
         },
         "actions": [
             "Check takeover",
@@ -348,7 +434,13 @@
         "priority": 8,
         "match": {
             "type": "url_contains",
-            "value": ["angoweb", "cloudflare", "dns", "registrar", "nikka"]
+            "value": [
+                "angoweb",
+                "cloudflare",
+                "dns",
+                "registrar",
+                "nikka"
+            ]
         },
         "actions": [
             "Check zone transfer",
@@ -362,7 +454,11 @@
         "priority": 9,
         "match": {
             "type": "url_contains",
-            "value": ["-all", "~all", "+all"]
+            "value": [
+                "-all",
+                "~all",
+                "+all"
+            ]
         },
         "actions": [
             "Test email spoofing",
@@ -376,7 +472,10 @@
         "priority": 6,
         "match": {
             "type": "url_contains",
-            "value": ["mx", "mail"]
+            "value": [
+                "mx",
+                "mail"
+            ]
         },
         "actions": [
             "Test SMTP relay",
@@ -390,7 +489,11 @@
         "priority": 6,
         "match": {
             "type": "url_contains",
-            "value": ["admin", "notif", "contact"]
+            "value": [
+                "admin",
+                "notif",
+                "contact"
+            ]
         },
         "actions": [
             "Email harvesting",
@@ -403,7 +506,13 @@
         "priority": 8,
         "match": {
             "type": "url_contains",
-            "value": [".bak", ".old", ".backup", ".zip", ".tar"]
+            "value": [
+                ".bak",
+                ".old",
+                ".backup",
+                ".zip",
+                ".tar"
+            ]
         },
         "actions": [
             "Download sensitive files",
@@ -416,7 +525,12 @@
         "priority": 10,
         "match": {
             "type": "url_contains",
-            "value": ["s3", "storage", "blob", "googleapis"]
+            "value": [
+                "s3",
+                "storage",
+                "blob",
+                "googleapis"
+            ]
         },
         "actions": [
             "Public bucket check",
@@ -429,7 +543,11 @@
         "priority": 9,
         "match": {
             "type": "url_contains",
-            "value": ["login", "signin", "auth"]
+            "value": [
+                "login",
+                "signin",
+                "auth"
+            ]
         },
         "actions": [
             "Bruteforce test",
@@ -443,7 +561,13 @@
         "priority": 10,
         "match": {
             "type": "url_contains",
-            "value": ["admin", "api", "dev", "staging", "cpanel"]
+            "value": [
+                "admin",
+                "api",
+                "dev",
+                "staging",
+                "cpanel"
+            ]
         },
         "actions": [
             "Chain recon",
@@ -458,7 +582,11 @@
         "priority": 8,
         "match": {
             "type": "mx_contains",
-            "value": ["google", "outlook", "mail"]
+            "value": [
+                "google",
+                "outlook",
+                "mail"
+            ]
         },
         "actions": [
             "Check email provider exposure",
@@ -472,7 +600,10 @@
         "priority": 9,
         "match": {
             "type": "ns_contains",
-            "value": ["angoweb", "cloudflare"]
+            "value": [
+                "angoweb",
+                "cloudflare"
+            ]
         },
         "actions": [
             "Check zone transfer",
@@ -486,12 +617,56 @@
         "priority": 9,
         "match": {
             "type": "txt_contains",
-            "value": ["v=spf", "api", "key", "token"]
+            "value": [
+                "v=spf",
+                "api",
+                "key",
+                "token"
+            ]
         },
         "actions": [
             "Extract secrets",
             "Check SPF policy",
             "Search leaked credentials"
+        ]
+    },
+    {
+        "name": "Cloud Metadata & Secrets Exposure",
+        "severity": 10,
+        "priority": 10,
+        "match": {
+            "type": "url_contains",
+            "value": [
+                "169.254.169.254",
+                ".aws/credentials",
+                ".azure/credentials",
+                "metadata.google.internal"
+            ]
+        },
+        "actions": [
+            "Try to extract IAM role credentials",
+            "Check for SSRF vulnerability",
+            "Analyze cloud environment context"
+        ]
+    },
+    {
+        "name": "Sensitive Framework Debug/Actuator",
+        "severity": 10,
+        "priority": 10,
+        "match": {
+            "type": "url_contains",
+            "value": [
+                "/actuator/env",
+                "/actuator/heapdump",
+                "/debug/vars",
+                "/_debug",
+                "/phpinfo.php"
+            ]
+        },
+        "actions": [
+            "Dump environment variables",
+            "Check for hardcoded secrets",
+            "Search for RCE entry points"
         ]
     }
 ]
