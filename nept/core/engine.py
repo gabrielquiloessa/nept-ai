@@ -78,6 +78,9 @@ class Engine:
         instance.run()
 
         results = getattr(instance, "results", [])
+ 
+        # How does AI receive the data?
+        # print(f"\n[DEBUG] Data delivered to AI: {json.dumps(results, indent=2)}")
 
         if self.json_mode:
             sys.stdout.write(json.dumps(results, indent=4))
