@@ -12,21 +12,26 @@ class CLI:
     def run(self):
         self.engine.load_modules()
 
-        parser = argparse.ArgumentParser(description="Nept Recon Framework")
+        parser = argparse.ArgumentParser(
+            description="Nept Recon Framework"
+        )
 
         parser.add_argument("module", nargs="?", help="Module")
+
         parser.add_argument("-t", "--target")
         parser.add_argument("-l", "--list")
         parser.add_argument("-w", "--wordlist")
 
         parser.add_argument("--mobile", action="store_true")
-        
-        parser.add_argument("--fast", action="store_true")
-        parser.add_argument("--threads", type=int)
 
-        parser.add_argument("-f", "--format",
-                            choices=["json", "txt", "csv"],
-                            default="txt")
+        parser.add_argument("--fast", action="store_true")
+        parser.add_argument("--threads", type=int, default=None)
+
+        parser.add_argument(
+            "-f", "--format",
+            choices=["json", "txt", "csv"],
+            default="txt"
+        )
 
         parser.add_argument("-o", "--output")
 
@@ -36,6 +41,7 @@ class CLI:
 
         args = parser.parse_args()
 
+        # ===== CONSOLE =====
         if args.console:
             self.engine.console()
             return
@@ -48,40 +54,52 @@ class CLI:
                 self.engine.ai.add_rule()
             return
 
+        # ===== HELP MODULE =====
         if not args.module:
-            print("[!] Use module or --console")
-            print("")
+            print("[!] Use module or --console\n")
             print("""
 Modules
 
 dir             Directory brute force
-dnsinfo         Dns Information
+dnsinfo         DNS Information
 subdomain       Subdomain brute force
-portscan        Ports scaner
+portscan        Ports scanner
 httpinfo        HTTP information
-recon           Test all modules            
+recon           Run all modules
             """)
             return
 
         self.engine.use_module(args.module)
 
-        # FORMAT -> JSON FLAG GLOBAL
-        if args.format == "json":
-            self.engine.set_option("json", True)
+        # ===== FORMAT =====
+        self.engine.set_option("format", args.format)
 
-        # MOBILE MODE
+        # FORMAT -> JSON FLAG GLOBAL
+        if args.format == "json": 
+            self.engine.set_option("json", True)
+        
+        # ===== MOBILE =====
         if args.mobile:
             self.engine.set_option("mobile", True)
-        
-        # FAST MODE
+
+        # ===== FAST MODE =====
         if args.fast:
-            self.engine.set_option("threads", 100)
-            self.engine.set_option("timeout", 2)
-            self.engine.set_option("mobile", True)
             self.engine.set_option("fast", True)
 
+            if args.threads is None:
+                self.engine.set_option("threads", 100)
+
+            self.engine.set_option("timeout", 2)
+
+        # ===== THREADS MANUAL =====
+        if args.threads is not None:
+            self.engine.set_option("threads", args.threads)
+
+        # ===== OUTROS PARAMS =====
         for k, v in vars(args).items():
-            if v and k not in ["module", "console", "fast", "ai", "format"]:
+            if v is not None and k not in [
+                "module", "console", "fast", "ai", "format", "threads"
+            ]:
                 self.engine.set_option(k, v)
 
         self.engine.run_module()
