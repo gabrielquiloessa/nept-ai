@@ -2,7 +2,7 @@
 
 import argparse
 from .engine import Engine
-
+from .update import Update 
 
 class CLI:
 
@@ -37,6 +37,8 @@ class CLI:
 
         parser.add_argument("--ai", choices=["add", "list"])
 
+        parser.add_argument("--update", choices=["rules", "modules"])
+                
         parser.add_argument("--console", action="store_true")
 
         args = parser.parse_args()
@@ -44,6 +46,22 @@ class CLI:
         # ===== CONSOLE =====
         if args.console:
             self.engine.console()
+            return
+
+        # ======UPDATES========
+        if args.update:
+            
+            updater = Update()
+            
+            if args.update == "rules":
+                updater.update_rules()
+            elif args.update == "modules":
+                updater.update_dir()
+                updater.update_dnsinfo()
+                updater.update_httpinfo()
+                updater.update_portscan()
+                updater.update_recon()
+                updater.update_subdomain()
             return
 
         # ===== AI MODE =====
