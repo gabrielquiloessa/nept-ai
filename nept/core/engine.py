@@ -10,7 +10,6 @@ from colorama import Fore, Style
 
 colorama.init(autoreset=True)
 
-
 class Engine:
 
     def __init__(self):
