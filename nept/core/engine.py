@@ -67,12 +67,24 @@ class Engine:
         
     def console(self):
         print("Nept Interactive Console")
+        print("""
+███╗░░██╗███████╗██████╗░████████╗
+████╗░██║██╔════╝██╔══██╗╚══██╔══╝
+██╔██╗██║█████╗░░██████╔╝░░░██║░░░
+██║╚████║██╔══╝░░██╔═══╝░░░░██║░░░
+██║░╚███║███████╗██║░░░░░░░░██║░░░
+╚═╝░░╚══╝╚══════╝╚═╝░░░░░░░░╚═╝░░░
+""")
+
         print("Type 'help' for commands.\n")
 
         while True:
             try:
-                cmd = input(f"{Fore.BLUE}nept>{Style.RESET_ALL} ").strip()
+                if not self.modules:
+                    cmd = input(f"{Fore.BLUE}nept>{Style.RESET_ALL} ").strip()
 
+                if self.modules:
+                    cmd = input(f"{Fore.BLUE}nept>{Style.RESET_ALL} ").strip()
                 if not cmd:
                     continue
 
