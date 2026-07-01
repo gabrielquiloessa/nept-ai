@@ -103,7 +103,7 @@ exit
                     self.use_module(module)
                     continue
 
-                if cmd == "show options":
+                if cmd == "show options" or cmd == "options":
                     for k, v in self.options.items():
                         print(f"{k} = {v.get('value')}")
                     continue
