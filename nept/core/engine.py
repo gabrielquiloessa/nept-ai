@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import importlib
 import pkgutil
 import json
@@ -11,7 +10,6 @@ from colorama import Fore, Style
 colorama.init(autoreset=True)
 
 class Engine:
-
     def __init__(self):
         self.modules = {}
         self.current_module = None
@@ -25,11 +23,9 @@ class Engine:
 
     def load_modules(self):
         import nept.modules as pkg
-
         for _, name, ispkg in pkgutil.iter_modules(pkg.__path__):
             if ispkg or name.startswith("_"):
                 continue
-
             try:
                 module = importlib.import_module(f"nept.modules.{name}")
                 self.modules[name] = module
@@ -46,11 +42,9 @@ class Engine:
         if name not in self.modules:
             self._log(f"{Fore.RED}[!] Module not found{Style.RESET_ALL}")
             return
-
         self.current_module = name
         cls = self._get_class(self.modules[name])
         self.options = cls.options() if hasattr(cls, "options") else {}
-
         self._log(f"{Fore.GREEN}[+] Using: {name}{Style.RESET_ALL}")
 
     def set_option(self, k, v):
@@ -62,27 +56,77 @@ class Engine:
         if not self.current_module:
             self._log(f"{Fore.RED}[!] No module selected{Style.RESET_ALL}")
             return
-
         cls = self._get_class(self.modules[self.current_module])
-
         kwargs = {
-            k.lower(): v["value"]
-            for k, v in self.options.items()
-            if v.get("value") is not None
+            k.lower(): v["value"] for k, v in self.options.items() if v.get("value") is not None
         }
-
         self.json_mode = kwargs.get("json", False)
-
         instance = cls(**kwargs)
         instance.run()
-
         results = getattr(instance, "results", [])
- 
-        # How does AI receive the data?
-        # print(f"\n[DEBUG] Data delivered to AI: {json.dumps(results, indent=2)}")
+        
+    def console(self):
+        print("Nept Interactive Console")
+        print("Type 'help' for commands.\n")
 
-        if self.json_mode:
-            sys.stdout.write(json.dumps(results, indent=4))
-            return
+        while True:
+            try:
+                cmd = input(f"{Fore.BLUE}nept>{Style.RESET_ALL} ").strip()
 
-        self.ai.run(results)
+                if not cmd:
+                    continue
+
+                if cmd in ("exit", "quit"):
+                    break
+
+                if cmd == "help":
+                    print("""
+Commands
+
+help
+modules
+use <module>
+set <option> <value>
+run
+show options
+exit
+""")
+                    continue
+
+                if cmd == "modules":
+                    for m in self.modules:
+                        print("-", m)
+                    continue
+
+                if cmd.startswith("use "):
+                    module = cmd.split(maxsplit=1)[1]
+                    self.use_module(module)
+                    continue
+
+                if cmd == "show options":
+                    for k, v in self.options.items():
+                        print(f"{k} = {v.get('value')}")
+                    continue
+
+                if cmd.startswith("set "):
+                    parts = cmd.split(maxsplit=2)
+
+                    if len(parts) < 3:
+                        print("Usage: set OPTION VALUE")
+                        continue
+
+                    self.set_option(parts[1], parts[2])
+                    continue
+
+                if cmd == "run":
+                    self.run_module()
+                    continue
+
+                print("Unknown command")
+
+            except KeyboardInterrupt:
+                print()
+                break
+
+            except EOFError:
+                break
