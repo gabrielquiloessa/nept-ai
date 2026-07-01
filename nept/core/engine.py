@@ -65,6 +65,8 @@ class Engine:
         instance.run()
         results = getattr(instance, "results", [])
         
+        self.ai.run(results)
+        
     def console(self):
         print("Nept Interactive Console")
         print("""
@@ -84,14 +86,24 @@ class Engine:
                     cmd = input(f"{Fore.BLUE}nept>{Style.RESET_ALL} ").strip()
 
                 if self.modules:
-                    cmd = input(f"{Fore.BLUE}nept>{Style.RESET_ALL} ").strip()
+                    cmd = input(f"{Fore.GREEN}({self.current_module}){Style.RESET_ALL} {Fore.BLUE}nept>{Style.RESET_ALL} ").strip()
                 if not cmd:
                     continue
 
                 if cmd in ("exit", "quit"):
                     break
+                    
+                if cmd == "clear":
+                    import os
+                    os.system("clear")
+                    
+                if cmd == "ai list":
+                    self.ai.list_rules()
+                    
+                if cmd == "ai add":
+                    self.ai.add_rule()
 
-                if cmd == "help":
+                if cmd in ("help", "?"):
                     print("""
 Commands
 
@@ -101,6 +113,7 @@ use <module>
 set <option> <value>
 run
 show options
+clear
 exit
 """)
                     continue
@@ -115,7 +128,7 @@ exit
                     self.use_module(module)
                     continue
 
-                if cmd == "show options" or cmd == "options":
+                if cmd in ("show options", "options"):
                     for k, v in self.options.items():
                         print(f"{k} = {v.get('value')}")
                     continue
@@ -142,3 +155,4 @@ exit
 
             except EOFError:
                 break
+                
