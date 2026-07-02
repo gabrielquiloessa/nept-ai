@@ -76,6 +76,7 @@ class Engine:
 ██║╚████║██╔══╝░░██╔═══╝░░░░██║░░░
 ██║░╚███║███████╗██║░░░░░░░░██║░░░
 ╚═╝░░╚══╝╚══════╝╚═╝░░░░░░░░╚═╝░░░
+@Gabriel_Quiloessa, @Nept, @Termux-Recon
 """)
 
         print("Type 'help' for commands.\n")
